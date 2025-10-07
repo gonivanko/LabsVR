@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Driver : MonoBehaviour
 {
-    [SerializeField] float velocity = -4f;
+    [SerializeField] float velocity = -10f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -13,11 +13,15 @@ public class Driver : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float delta = Input.GetAxis("Vertical");
+        float verticalDelta = Input.GetAxis("Vertical");
+        float horizontalDelta = Input.GetAxis("Horizontal");
         float timeDelta = Time.deltaTime;
-        float verticalDelta = timeDelta * velocity * delta;
+        float verticalMovement = timeDelta * velocity * verticalDelta;
+        float horizontalRotation = timeDelta * horizontalDelta * verticalDelta * 100;
 
-        Debug.Log("Update");
-        transform.Translate(verticalDelta, 0, 0);
+        transform.Rotate(0, horizontalRotation, 0);
+        transform.Translate(verticalMovement, 0, 0);
+
     }
+
 }
