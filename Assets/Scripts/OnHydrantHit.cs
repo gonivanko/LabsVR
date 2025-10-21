@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class HydrantHit : MonoBehaviour
+public class OnHydrantHit : MonoBehaviour
 {
     [SerializeField] private ParticleSystem waterEffect;
 
     void OnCollisionEnter(Collision otherObject)
     {
-        if (otherObject.gameObject.tag == "LawnMower")
+        if (otherObject.gameObject.CompareTag("LawnMower"))
         {
             if (waterEffect != null)
             {
