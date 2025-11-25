@@ -45,26 +45,50 @@
 
 До інших об'єктів відносяться об'єкти Teleportation Area та Teleportation Anchor для демонстрації телепортації, а також об'єкти Barrel та RedCube, GreenCube, BlueCube для демонстрації переміщення об'єктів за допомогою контролерів
 
+Також сцена містить форми для меню (яка відкривається перед користувачем) та форми для перегляду інформації про об'єкти. Для їх відкриття потрібно натиснути додаткову та основну кнопку лівого контролера відповідно
+
 #### Скріншот сцени
 
 ![Скріншот другої сцени](screenshot_2.png)
 
 ## Структура проекту
 
+### Сцена з газонокосаркою
+
 Основний код для першої сцени знаходиться в директорії [Assets/Scripts](Assets/Scripts). 
 
-### [WheelController.cs](Assets/Scripts/Driver.cs)
+#### [WheelController.cs](Assets/Scripts/WheelController.cs)
 
 Клас, призначений для переміщення газонокосарки за допомогою компонентів WheelCollider
 
-### [UfoDriver.cs](Assets/Scripts/UfoDriver.cs)
+#### [UfoDriver.cs](Assets/Scripts/UfoDriver.cs)
 
 Клас, призначений для переміщення НЛО
 
-### [OnHydrantHit.cs](Assets/Scripts/OnHydrantHit.cs)
+#### [OnHydrantHit.cs](Assets/Scripts/OnHydrantHit.cs)
 
 Клас, призначений для обробки зіткнення з гідрантом
 
-### [OnCubeHit.cs](Assets/Scripts/OnCubeHit.cs)
+#### [OnCubeHit.cs](Assets/Scripts/OnCubeHit.cs)
 
 Клас, призначений для обробки зіткнення з "алхімічним" кубом
+
+### VR-сцена
+
+Основний код для другої сцени знаходиться в директорії [Assets/Scripts/VR](Assets/Scripts/VR/). 
+
+#### [FollowObjectPosition.cs](Assets/Scripts/VR/FollowObjectPosition.cs)
+
+Клас, призначений для "стеження" інформаційної форми за об'єктом
+
+#### [FormManager.cs](Assets/Scripts/VR/FormManager.cs)
+
+Клас, призначений для збереження та відновлення даних форми меню
+
+#### [InfoViewer.cs](Assets/Scripts/VR/InfoViewer.cs)
+
+Клас, призначений для взаємодії інформаційної форми, кнопки контролера та подій наведення на об'єкт
+
+#### [MenuToggle.cs](Assets/Scripts/VR/MenuToggle.cs)
+
+Клас, призначений для взаємодії форми меню та кнопки контрлера

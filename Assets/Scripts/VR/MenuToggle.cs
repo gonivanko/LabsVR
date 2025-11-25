@@ -10,7 +10,6 @@ public class MenuToggle : MonoBehaviour
     {
         gameObject.SetActive(false);
         toggleMenuAction.action.started += ButtonWasPressed;
-        //toggleMenuAction.action.canceled += ButtonWasReleased;
     }
 
     // Update is called once per frame
@@ -21,13 +20,6 @@ public class MenuToggle : MonoBehaviour
 
     private void ButtonWasPressed(InputAction.CallbackContext context)
     {
-        Debug.Log("Button Pressed " + gameObject.name);
         gameObject.SetActive(!gameObject.activeSelf);
     }
-
-    //private void ButtonWasReleased(InputAction.CallbackContext context)
-    //{
-    //    Debug.Log("Button Released");
-    //    gameObject.SetActive(!gameObject.activeSelf);
-    //}
 }
