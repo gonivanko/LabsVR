@@ -203,8 +203,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 341166083}
-        m_TargetAssemblyTypeName: WebRequestTest, Assembly-CSharp
-        m_MethodName: decrementDay
+        m_TargetAssemblyTypeName: ScheduleManager, Assembly-CSharp
+        m_MethodName: DecrementDay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4376,8 +4376,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 341166083}
-        m_TargetAssemblyTypeName: WebRequestTest, Assembly-CSharp
-        m_MethodName: incrementDay
+        m_TargetAssemblyTypeName: ScheduleManager, Assembly-CSharp
+        m_MethodName: IncrementDay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4661,8 +4661,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 341166083}
-        m_TargetAssemblyTypeName: WebRequestTest, Assembly-CSharp
-        m_MethodName: toggleWeek
+        m_TargetAssemblyTypeName: ScheduleManager, Assembly-CSharp
+        m_MethodName: ToggleWeek
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
