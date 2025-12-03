@@ -7,6 +7,22 @@ public class Schedule
     public string groupCode;
     public DaySchedule[] scheduleFirstWeek;
     public DaySchedule[] scheduleSecondWeek;
+
+    public static List<string> GetAllUniqueSubjects(Schedule schedule)
+    {
+        HashSet<string> set = new HashSet<string>();
+
+        foreach (var day in schedule.scheduleFirstWeek)
+            foreach (var pair in day.pairs)
+                set.Add(pair.name);
+
+        foreach (var day in schedule.scheduleSecondWeek)
+            foreach (var pair in day.pairs)
+                set.Add(pair.name);
+
+        return new List<string>(set);
+    }
+
 }
 
 [Serializable]
