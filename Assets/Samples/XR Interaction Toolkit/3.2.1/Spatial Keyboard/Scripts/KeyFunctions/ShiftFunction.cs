@@ -2,13 +2,12 @@
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard.KeyFunctions
 {
     /// <summary>
-    /// Key function used to process shift and caps lock functionality.
+    ///     Key function used to process shift and caps lock functionality.
     /// </summary>
     [CreateAssetMenu(fileName = "Shift Function", menuName = "XR/Spatial Keyboard/Shift Key Function", order = 1)]
     public class ShiftFunction : KeyFunction
     {
-        [SerializeField]
-        Sprite m_CapsLockDisplayIcon;
+        [SerializeField] private Sprite m_CapsLockDisplayIcon;
 
         public Sprite capsLockDisplayIcon
         {
@@ -40,7 +39,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard.KeyFunction
             var keyCode = KeyCode.LeftShift;
 
             // Check the caps lock state of the keyboard. If they key is shifted, check if there is a double click.
-            if (keyboardContext.capsLocked || (keyboardContext.shifted && key.timeSinceLastClick < keyboardContext.doubleClickInterval))
+            if (keyboardContext.capsLocked ||
+                (keyboardContext.shifted && key.timeSinceLastClick < keyboardContext.doubleClickInterval))
                 keyCode = KeyCode.CapsLock;
 
             keyboardContext.ProcessKeyCode(keyCode);

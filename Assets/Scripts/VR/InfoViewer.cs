@@ -3,11 +3,11 @@ using UnityEngine.InputSystem;
 
 public class InfoViewer : MonoBehaviour
 {
-    [SerializeField] InputActionReference inputActionReference;
-    [SerializeField] GameObject infoPanel;
+    [SerializeField] private InputActionReference inputActionReference;
+    [SerializeField] private GameObject infoPanel;
 
-    private bool buttonIsPressed = false;
-    private bool isHovering = false;
+    private bool buttonIsPressed;
+    private bool isHovering;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
@@ -25,8 +25,8 @@ public class InfoViewer : MonoBehaviour
     private void ButtonWasPressed(InputAction.CallbackContext context)
     {
         buttonIsPressed = true;
-        
     }
+
     private void ButtonWasReleased(InputAction.CallbackContext context)
     {
         buttonIsPressed = false;
@@ -36,6 +36,7 @@ public class InfoViewer : MonoBehaviour
     {
         isHovering = true;
     }
+
     public void OnHoverExit()
     {
         isHovering = false;

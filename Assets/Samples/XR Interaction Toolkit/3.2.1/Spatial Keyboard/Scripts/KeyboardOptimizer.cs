@@ -5,17 +5,40 @@ using UnityEngine.UI;
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 {
     /// <summary>
-    /// This script is used to optimize the keyboard rendering performance by updating the canvas hierarchy
-    /// into separate parent transforms based on UI Grouping. This will greatly reduce the number of draw calls.
-    /// Optimization is only done at runtime to prevent breaking the prefab.
+    ///     This script is used to optimize the keyboard rendering performance by updating the canvas hierarchy
+    ///     into separate parent transforms based on UI Grouping. This will greatly reduce the number of draw calls.
+    ///     Optimization is only done at runtime to prevent breaking the prefab.
     /// </summary>
     public class KeyboardOptimizer : MonoBehaviour
     {
-        [SerializeField]
-        bool m_OptimizeOnStart = true;
+        [SerializeField] private bool m_OptimizeOnStart = true;
+
+        [SerializeField] private Transform m_BatchGroupParentTransform;
+
+        [SerializeField] private Transform m_ButtonParentTransform;
+
+        [SerializeField] private Transform m_ImageParentTransform;
+
+        [SerializeField] private Transform m_TextParentTransform;
+
+        [SerializeField] private Transform m_IconParentTransform;
+
+        [SerializeField] private Transform m_HighlightParentTransform;
 
         /// <summary>
-        /// If enabled, the optimization will be called on <see cref="Start"/>.
+        ///     List of key data. This is used to store information that allows us
+        ///     to revert the keyboard back to its original state (aka unoptimize).
+        /// </summary>
+        private readonly List<KeyData> m_KeyData = new();
+
+        /// <summary>
+        ///     Horizontal layout groups need to be disabled when optimizing the keyboard
+        ///     otherwise the input field will not position correctly.
+        /// </summary>
+        private HorizontalLayoutGroup[] m_LayoutGroups;
+
+        /// <summary>
+        ///     If enabled, the optimization will be called on <see cref="Start" />.
         /// </summary>
         public bool optimizeOnStart
         {
@@ -23,11 +46,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_OptimizeOnStart = value;
         }
 
-        [SerializeField]
-        Transform m_BatchGroupParentTransform;
-
         /// <summary>
-        /// The parent transform for batch groups.
+        ///     The parent transform for batch groups.
         /// </summary>
         public Transform batchGroupParentTransform
         {
@@ -35,11 +55,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_BatchGroupParentTransform = value;
         }
 
-        [SerializeField]
-        Transform m_ButtonParentTransform;
-
         /// <summary>
-        /// The parent transform for buttons.
+        ///     The parent transform for buttons.
         /// </summary>
         public Transform buttonParentTransform
         {
@@ -47,11 +64,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_ButtonParentTransform = value;
         }
 
-        [SerializeField]
-        Transform m_ImageParentTransform;
-
         /// <summary>
-        /// The parent transform for images.
+        ///     The parent transform for images.
         /// </summary>
         public Transform imageParentTransform
         {
@@ -59,11 +73,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_ImageParentTransform = value;
         }
 
-        [SerializeField]
-        Transform m_TextParentTransform;
-
         /// <summary>
-        /// The parent transform for text elements.
+        ///     The parent transform for text elements.
         /// </summary>
         public Transform textParentTransform
         {
@@ -71,11 +82,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_TextParentTransform = value;
         }
 
-        [SerializeField]
-        Transform m_IconParentTransform;
-
         /// <summary>
-        /// The parent transform for icons.
+        ///     The parent transform for icons.
         /// </summary>
         public Transform iconParentTransform
         {
@@ -83,11 +91,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_IconParentTransform = value;
         }
 
-        [SerializeField]
-        Transform m_HighlightParentTransform;
-
         /// <summary>
-        /// The parent transform for highlights.
+        ///     The parent transform for highlights.
         /// </summary>
         public Transform highlightParentTransform
         {
@@ -95,27 +100,13 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_HighlightParentTransform = value;
         }
 
-        bool m_IsCurrentlyOptimized;
-
         /// <summary>
-        /// Is the keyboard currently optimized?
+        ///     Is the keyboard currently optimized?
         /// </summary>
-        public bool isCurrentlyOptimized => m_IsCurrentlyOptimized;
+        public bool isCurrentlyOptimized { get; private set; }
 
         /// <summary>
-        /// Horizontal layout groups need to be disabled when optimizing the keyboard
-        /// otherwise the input field will not position correctly.
-        /// </summary>
-        HorizontalLayoutGroup[] m_LayoutGroups;
-
-        /// <summary>
-        /// List of key data. This is used to store information that allows us
-        /// to revert the keyboard back to its original state (aka unoptimize).
-        /// </summary>
-        readonly List<KeyData> m_KeyData = new List<KeyData>();
-
-        /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
+        ///     See <see cref="MonoBehaviour" />.
         /// </summary>
         protected void Start()
         {
@@ -127,13 +118,14 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Check all the references needed for optimization.
+        ///     Check all the references needed for optimization.
         /// </summary>
-        void CheckReferences()
+        private void CheckReferences()
         {
             if (!TryGetOrCreateTransformReferences())
             {
-                Debug.LogError("Failed to get or create transform references. Optimization will not be possible.", this);
+                Debug.LogError("Failed to get or create transform references. Optimization will not be possible.",
+                    this);
                 return;
             }
 
@@ -144,7 +136,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 GetLayoutGroups();
         }
 
-        bool TryGetOrCreateTransformReferences()
+        private bool TryGetOrCreateTransformReferences()
         {
             if (m_BatchGroupParentTransform == null)
             {
@@ -176,27 +168,25 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             return true;
         }
 
-        void GetKeys()
+        private void GetKeys()
         {
-            XRKeyboardKey[] keys = GetComponentsInChildren<XRKeyboardKey>();
+            var keys = GetComponentsInChildren<XRKeyboardKey>();
             foreach (var keyboardKey in keys)
-            {
                 m_KeyData.Add(new KeyData
                 {
                     key = keyboardKey,
                     batchFollow = keyboardKey.GetComponent<KeyboardBatchFollow>(),
                     parent = keyboardKey.transform.parent,
-                    childPosition = keyboardKey.transform.GetSiblingIndex(),
+                    childPosition = keyboardKey.transform.GetSiblingIndex()
                 });
-            }
         }
 
-        void GetLayoutGroups()
+        private void GetLayoutGroups()
         {
             m_LayoutGroups = GetComponentsInChildren<HorizontalLayoutGroup>();
         }
 
-        static Transform CreateTransformAndSetParent(string name, Transform parent)
+        private static Transform CreateTransformAndSetParent(string name, Transform parent)
         {
             var t = new GameObject(name).transform;
             t.SetParent(parent);
@@ -207,15 +197,13 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Optimize the keyboard. This will set all the different components of each keyboard key into separate parent transforms for batching.
+        ///     Optimize the keyboard. This will set all the different components of each keyboard key into separate parent
+        ///     transforms for batching.
         /// </summary>
         public void Optimize()
         {
-            m_IsCurrentlyOptimized = true;
-            foreach (var layoutGroup in m_LayoutGroups)
-            {
-                layoutGroup.enabled = false;
-            }
+            isCurrentlyOptimized = true;
+            foreach (var layoutGroup in m_LayoutGroups) layoutGroup.enabled = false;
 
             foreach (var keyData in m_KeyData)
             {
@@ -242,19 +230,16 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Unoptimize the keyboard. This will set the keyboard back to its original state.
+        ///     Unoptimize the keyboard. This will set the keyboard back to its original state.
         /// </summary>
         public void Unoptimize()
         {
-            m_IsCurrentlyOptimized = false;
-            foreach (var layoutGroup in GetComponentsInChildren<HorizontalLayoutGroup>())
-            {
-                layoutGroup.enabled = true;
-            }
+            isCurrentlyOptimized = false;
+            foreach (var layoutGroup in GetComponentsInChildren<HorizontalLayoutGroup>()) layoutGroup.enabled = true;
 
             foreach (var keyData in m_KeyData)
             {
-                XRKeyboardKey key = keyData.key;
+                var key = keyData.key;
                 if (key == null)
                     continue;
 
@@ -279,7 +264,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        struct KeyData
+        private struct KeyData
         {
             public XRKeyboardKey key;
             public KeyboardBatchFollow batchFollow;

@@ -3,12 +3,19 @@ using UnityEngine;
 
 public class FormManager : MonoBehaviour
 {
-    [SerializeField] TMP_InputField nameInputField;
-    [SerializeField] TMP_InputField ageInputField;
+    [SerializeField] private TMP_InputField nameInputField;
+
+    [SerializeField] private TMP_InputField ageInputField;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Start()
     {
         //LoadData();
+    }
+
+    // Update is called once per frame
+    private void Update()
+    {
     }
 
     public void SaveData()
@@ -17,21 +24,10 @@ public class FormManager : MonoBehaviour
         PlayerPrefs.SetInt("Age", int.Parse(ageInputField.text));
         PlayerPrefs.Save();
     }
+
     public void LoadData()
     {
-        if (PlayerPrefs.HasKey("Name"))
-        {
-            nameInputField.text = PlayerPrefs.GetString("Name");
-        }
-        if (PlayerPrefs.HasKey("Age"))
-        {
-            ageInputField.text = PlayerPrefs.GetInt("Age").ToString();
-        }
-    }
-
-    // Update is called once per frame
-    private void Update()
-    {
-        
+        if (PlayerPrefs.HasKey("Name")) nameInputField.text = PlayerPrefs.GetString("Name");
+        if (PlayerPrefs.HasKey("Age")) ageInputField.text = PlayerPrefs.GetInt("Age").ToString();
     }
 }

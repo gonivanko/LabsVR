@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class FollowObjectPosition : MonoBehaviour
 {
-    [SerializeField] Transform target;
-    [SerializeField] Vector3 offset;
+    [SerializeField] private Transform target;
+    [SerializeField] private Vector3 offset;
 
     private void LateUpdate()
     {

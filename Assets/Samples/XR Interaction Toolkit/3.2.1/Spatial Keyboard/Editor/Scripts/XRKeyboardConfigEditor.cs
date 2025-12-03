@@ -5,18 +5,26 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard;
 namespace UnityEditor.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 {
     /// <summary>
-    /// Custom editor for an <see cref="XRKeyboardConfig"/>.
+    ///     Custom editor for an <see cref="XRKeyboardConfig" />.
     /// </summary>
-    [CustomEditor(typeof(XRKeyboardConfig), true), CanEditMultipleObjects]
+    [CustomEditor(typeof(XRKeyboardConfig), true)]
+    [CanEditMultipleObjects]
     public class XRKeyboardConfigEditor : BaseInteractionEditor
     {
-        /// <summary><see cref="SerializedProperty"/> of the <see cref="SerializeField"/> backing <see cref="XRKeyboardConfig.defaultKeyFunction"/>.</summary>
+        /// <summary>
+        ///     <see cref="SerializedProperty" /> of the <see cref="SerializeField" /> backing
+        ///     <see cref="XRKeyboardConfig.defaultKeyFunction" />.
+        /// </summary>
         protected SerializedProperty m_DefaultKeyFunction;
-        /// <summary><see cref="SerializedProperty"/> of the <see cref="SerializeField"/> backing <see cref="XRKeyboardConfig.keyMappings"/>.</summary>
+
+        /// <summary>
+        ///     <see cref="SerializedProperty" /> of the <see cref="SerializeField" /> backing
+        ///     <see cref="XRKeyboardConfig.keyMappings" />.
+        /// </summary>
         protected SerializedProperty m_KeyMappings;
 
         /// <summary>
-        /// See <see cref="Editor"/>.
+        ///     See <see cref="Editor" />.
         /// </summary>
         protected virtual void OnEnable()
         {

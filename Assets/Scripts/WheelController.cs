@@ -17,23 +17,16 @@ public class WheelController : MonoBehaviour
 
     [SerializeField] private float maxSteerAngle = 30f;
 
-    private float currentAcceleration = 0f;
-    private float currentSteerAngle = 0f;
-    private float currentBrakeForce = 0f;
-
-    private static void UpdateWheel(WheelCollider collider, Transform transform)
-    {
-        collider.GetWorldPose(out var position, out var rotation);
-
-        transform.SetPositionAndRotation(position, rotation);
-    }
+    private float currentAcceleration;
+    private float currentBrakeForce;
+    private float currentSteerAngle;
 
     private void FixedUpdate()
     {
         currentAcceleration = acceleration * Input.GetAxis("Vertical");
         currentSteerAngle = maxSteerAngle * Input.GetAxis("Horizontal");
 
-        currentBrakeForce = (Input.GetKey(KeyCode.Space) ? brakeForce : 0f);
+        currentBrakeForce = Input.GetKey(KeyCode.Space) ? brakeForce : 0f;
 
 
         frontRight.motorTorque = currentAcceleration;
@@ -51,5 +44,10 @@ public class WheelController : MonoBehaviour
         UpdateWheel(backLeft, backLeftTransform);
     }
 
-    
+    private static void UpdateWheel(WheelCollider collider, Transform transform)
+    {
+        collider.GetWorldPose(out var position, out var rotation);
+
+        transform.SetPositionAndRotation(position, rotation);
+    }
 }

@@ -5,91 +5,61 @@ using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
 {
     [RequireComponent(typeof(XRDeviceSimulatorUI))]
-    class XRDeviceSimulatorControllerUI : MonoBehaviour
+    internal class XRDeviceSimulatorControllerUI : MonoBehaviour
     {
-        [Header("General")]
+        [Header("General")] [SerializeField] private Image m_ControllerImage;
 
-        [SerializeField]
-        Image m_ControllerImage;
+        [SerializeField] private Image m_ControllerOverlayImage;
 
-        [SerializeField]
-        Image m_ControllerOverlayImage;
+        [Header("Primary Button")] [SerializeField]
+        private Image m_PrimaryButtonImage;
 
-        [Header("Primary Button")]
+        [SerializeField] private Text m_PrimaryButtonText;
 
-        [SerializeField]
-        Image m_PrimaryButtonImage;
+        [SerializeField] private Image m_PrimaryButtonIcon;
 
-        [SerializeField]
-        Text m_PrimaryButtonText;
+        [Header("Secondary Button")] [SerializeField]
+        private Image m_SecondaryButtonImage;
 
-        [SerializeField]
-        Image m_PrimaryButtonIcon;
+        [SerializeField] private Text m_SecondaryButtonText;
 
-        [Header("Secondary Button")]
+        [SerializeField] private Image m_SecondaryButtonIcon;
 
-        [SerializeField]
-        Image m_SecondaryButtonImage;
+        [Header("Trigger")] [SerializeField] private Image m_TriggerButtonImage;
 
-        [SerializeField]
-        Text m_SecondaryButtonText;
+        [SerializeField] private Text m_TriggerButtonText;
 
-        [SerializeField]
-        Image m_SecondaryButtonIcon;
+        [SerializeField] private Image m_TriggerButtonIcon;
 
-        [Header("Trigger")]
+        [Header("Grip")] [SerializeField] private Image m_GripButtonImage;
 
-        [SerializeField]
-        Image m_TriggerButtonImage;
+        [SerializeField] private Text m_GripButtonText;
 
-        [SerializeField]
-        Text m_TriggerButtonText;
+        [SerializeField] private Image m_GripButtonIcon;
 
-        [SerializeField]
-        Image m_TriggerButtonIcon;
+        [Header("Thumbstick")] [SerializeField]
+        private Image m_ThumbstickButtonImage;
 
-        [Header("Grip")]
+        [SerializeField] private Text m_ThumbstickButtonText;
 
-        [SerializeField]
-        Image m_GripButtonImage;
+        [SerializeField] private Image m_ThumbstickButtonIcon;
 
-        [SerializeField]
-        Text m_GripButtonText;
+        [Header("Menu")] [SerializeField] private Image m_MenuButtonImage;
 
-        [SerializeField]
-        Image m_GripButtonIcon;
+        [SerializeField] private Text m_MenuButtonText;
 
-        [Header("Thumbstick")]
+        [SerializeField] private Image m_MenuButtonIcon;
 
-        [SerializeField]
-        Image m_ThumbstickButtonImage;
+        private bool m_GripActivated;
 
-        [SerializeField]
-        Text m_ThumbstickButtonText;
+        private XRDeviceSimulatorUI m_MainUIManager;
+        private bool m_MenuActivated;
 
-        [SerializeField]
-        Image m_ThumbstickButtonIcon;
-
-        [Header("Menu")]
-
-        [SerializeField]
-        Image m_MenuButtonImage;
-
-        [SerializeField]
-        Text m_MenuButtonText;
-
-        [SerializeField]
-        Image m_MenuButtonIcon;
-
-        XRDeviceSimulatorUI m_MainUIManager;
-
-        bool m_PrimaryButtonActivated;
-        bool m_SecondaryButtonActivated;
-        bool m_TriggerActivated;
-        bool m_GripActivated;
-        bool m_MenuActivated;
-        bool m_XAxisTranslateActivated;
-        bool m_YAxisTranslateActivated;
+        private bool m_PrimaryButtonActivated;
+        private bool m_SecondaryButtonActivated;
+        private bool m_TriggerActivated;
+        private bool m_XAxisTranslateActivated;
+        private bool m_YAxisTranslateActivated;
 
         protected void Awake()
         {
@@ -112,18 +82,23 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
 
         internal void SetAsActiveController(bool active, XRDeviceSimulator simulator, bool isRestingHand = false)
         {
-            var controls = isRestingHand ?
-                simulator.restingHandAxis2DAction.action.controls :
-                simulator.axis2DAction.action.controls;
+            var controls = isRestingHand
+                ? simulator.restingHandAxis2DAction.action.controls
+                : simulator.axis2DAction.action.controls;
 
-            m_ThumbstickButtonText.text = $"{controls[0].displayName}, {controls[1].displayName}, {controls[2].displayName}, {controls[3].displayName}";
+            m_ThumbstickButtonText.text =
+                $"{controls[0].displayName}, {controls[1].displayName}, {controls[2].displayName}, {controls[3].displayName}";
 
-            UpdateButtonVisuals(active, m_PrimaryButtonIcon, m_PrimaryButtonText, simulator.primaryButtonAction.action.controls[0]);
-            UpdateButtonVisuals(active, m_SecondaryButtonIcon, m_SecondaryButtonText, simulator.secondaryButtonAction.action.controls[0]);
-            UpdateButtonVisuals(active, m_TriggerButtonIcon, m_TriggerButtonText, simulator.triggerAction.action.controls[0]);
+            UpdateButtonVisuals(active, m_PrimaryButtonIcon, m_PrimaryButtonText,
+                simulator.primaryButtonAction.action.controls[0]);
+            UpdateButtonVisuals(active, m_SecondaryButtonIcon, m_SecondaryButtonText,
+                simulator.secondaryButtonAction.action.controls[0]);
+            UpdateButtonVisuals(active, m_TriggerButtonIcon, m_TriggerButtonText,
+                simulator.triggerAction.action.controls[0]);
             UpdateButtonVisuals(active, m_GripButtonIcon, m_GripButtonText, simulator.gripAction.action.controls[0]);
             UpdateButtonVisuals(active, m_MenuButtonIcon, m_MenuButtonText, simulator.menuAction.action.controls[0]);
-            UpdateButtonVisuals(active || isRestingHand, m_ThumbstickButtonIcon, m_ThumbstickButtonText, simulator.axis2DAction.action.controls[0]);
+            UpdateButtonVisuals(active || isRestingHand, m_ThumbstickButtonIcon, m_ThumbstickButtonText,
+                simulator.axis2DAction.action.controls[0]);
 
             if (active)
             {
@@ -139,14 +114,18 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
             }
             else
             {
-                UpdateDisableControllerButton(m_PrimaryButtonActivated, m_PrimaryButtonImage, m_PrimaryButtonIcon, m_PrimaryButtonText);
-                UpdateDisableControllerButton(m_SecondaryButtonActivated, m_SecondaryButtonImage, m_SecondaryButtonIcon, m_SecondaryButtonText);
-                UpdateDisableControllerButton(m_TriggerActivated, m_TriggerButtonImage, m_TriggerButtonIcon, m_TriggerButtonText);
+                UpdateDisableControllerButton(m_PrimaryButtonActivated, m_PrimaryButtonImage, m_PrimaryButtonIcon,
+                    m_PrimaryButtonText);
+                UpdateDisableControllerButton(m_SecondaryButtonActivated, m_SecondaryButtonImage, m_SecondaryButtonIcon,
+                    m_SecondaryButtonText);
+                UpdateDisableControllerButton(m_TriggerActivated, m_TriggerButtonImage, m_TriggerButtonIcon,
+                    m_TriggerButtonText);
                 UpdateDisableControllerButton(m_GripActivated, m_GripButtonImage, m_GripButtonIcon, m_GripButtonText);
                 UpdateDisableControllerButton(m_MenuActivated, m_MenuButtonImage, m_MenuButtonIcon, m_MenuButtonText);
 
                 if (!isRestingHand)
-                    UpdateDisableControllerButton(m_XAxisTranslateActivated || m_YAxisTranslateActivated, m_ThumbstickButtonImage, m_ThumbstickButtonIcon, m_ThumbstickButtonText);
+                    UpdateDisableControllerButton(m_XAxisTranslateActivated || m_YAxisTranslateActivated,
+                        m_ThumbstickButtonImage, m_ThumbstickButtonIcon, m_ThumbstickButtonText);
                 else
                     m_ThumbstickButtonImage.color = m_MainUIManager.buttonColor;
 
@@ -157,7 +136,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
 
         // This function keeps the button selected color active if the key if hold when the controller is disabled.
         // Other buttons are disabled to avoid adding extra noise.
-        void UpdateDisableControllerButton(bool active, Image button, Image buttonIcon, Text buttonText)
+        private void UpdateDisableControllerButton(bool active, Image button, Image buttonIcon, Text buttonText)
         {
             if (active)
             {
@@ -175,7 +154,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
             }
         }
 
-        void UpdateButtonVisuals(bool active, Image buttonIcon, Text buttonText, InputControl control)
+        private void UpdateButtonVisuals(bool active, Image buttonIcon, Text buttonText, InputControl control)
         {
             buttonText.gameObject.SetActive(active);
             buttonIcon.gameObject.SetActive(active);
@@ -203,7 +182,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.DeviceSimulator
             }
         }
 
-        void UpdateButtonColor(Image image, bool activated)
+        private void UpdateButtonColor(Image image, bool activated)
         {
             image.color = activated ? m_MainUIManager.selectedColor : m_MainUIManager.buttonColor;
         }

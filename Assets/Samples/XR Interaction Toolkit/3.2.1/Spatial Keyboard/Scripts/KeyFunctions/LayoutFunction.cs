@@ -2,7 +2,7 @@
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard.KeyFunctions
 {
     /// <summary>
-    /// Key function used to update the keyboard layout.
+    ///     Key function used to update the keyboard layout.
     /// </summary>
     [CreateAssetMenu(fileName = "Layout Function", menuName = "XR/Spatial Keyboard/Layout Key Function", order = 1)]
     public class LayoutFunction : KeyFunction

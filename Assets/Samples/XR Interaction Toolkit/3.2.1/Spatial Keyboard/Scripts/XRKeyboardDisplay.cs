@@ -5,15 +5,72 @@ using UnityEngine.Events;
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 {
     /// <summary>
-    /// Utility class to help facilitate input field relationship with <see cref="XRKeyboard"/>
+    ///     Utility class to help facilitate input field relationship with <see cref="XRKeyboard" />
     /// </summary>
     public class XRKeyboardDisplay : MonoBehaviour
     {
-        [SerializeField, Tooltip("Input field linked to this display.")]
-        TMP_InputField m_InputField;
+        [SerializeField] [Tooltip("Input field linked to this display.")]
+        private TMP_InputField m_InputField;
+
+        // The script requires setter property logic to be run, so disable when playing
+        [SerializeField]
+        [Tooltip(
+            "Keyboard for this display to monitor and interact with. If empty this will default to the GlobalNonNativeKeyboard keyboard.")]
+        private XRKeyboard m_Keyboard;
+
+        [SerializeField]
+        [Tooltip(
+            "If true, this display will use the keyboard reference. If false or if the keyboard field is empty, this display will use global keyboard.")]
+        private bool m_UseSceneKeyboard;
+
+        [SerializeField]
+        [Tooltip(
+            "If true, this display will update with each key press. If false, this display will update on OnTextSubmit.")]
+        private bool m_UpdateOnKeyPress = true;
+
+        [SerializeField]
+        [Tooltip(
+            "If true, this display will always subscribe to the keyboard updates. If false, this display will subscribe to keyboard when the input field gains focus.")]
+        private bool m_AlwaysObserveKeyboard;
+
+        [SerializeField]
+        [Tooltip(
+            "If true, this display will use the input field's character limit to limit the update text from the keyboard and will pass this into the keyboard when opening.")]
+        public bool m_MonitorInputFieldCharacterLimit;
+
+        [SerializeField]
+        [Tooltip("If true, this display will clear the input field text on text submit from the keyboard.")]
+        public bool m_ClearTextOnSubmit;
+
+        [SerializeField] [Tooltip("If true, this display will clear the input field text when the keyboard opens.")]
+        public bool m_ClearTextOnOpen;
+
+        [SerializeField]
+        [Tooltip("If true, this display will close the keyboard it is observing when this GameObject is disabled.")]
+        public bool m_HideKeyboardOnDisable = true;
+
+        [SerializeField]
+        [Tooltip(
+            "The event that is called when this display receives a text submitted event from the keyboard. Invoked with the keyboard text as a parameter.")]
+        private UnityEvent<string> m_OnTextSubmitted = new();
+
+        [SerializeField] [Tooltip("The event that is called when this display opens a keyboard.")]
+        private UnityEvent m_OnKeyboardOpened = new();
+
+        [SerializeField] [Tooltip("The event that is called when the keyboard this display is observing is closed.")]
+        private UnityEvent m_OnKeyboardClosed = new();
+
+        [SerializeField]
+        [Tooltip("The event that is called when the keyboard changes focus and this display is not focused.")]
+        private UnityEvent m_OnKeyboardFocusChanged = new();
+
+        // Active keyboard for this display
+        private XRKeyboard m_ActiveKeyboard;
+
+        private bool m_IsActivelyObservingKeyboard;
 
         /// <summary>
-        /// Input field linked to this display.
+        ///     Input field linked to this display.
         /// </summary>
         public TMP_InputField inputField
         {
@@ -33,12 +90,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        // The script requires setter property logic to be run, so disable when playing
-        [SerializeField, Tooltip("Keyboard for this display to monitor and interact with. If empty this will default to the GlobalNonNativeKeyboard keyboard.")]
-        XRKeyboard m_Keyboard;
-
         /// <summary>
-        /// Keyboard for this display to monitor and interact with. If empty this will default to the <see cref="GlobalNonNativeKeyboard"/> keyboard.
+        ///     Keyboard for this display to monitor and interact with. If empty this will default to the
+        ///     <see cref="GlobalNonNativeKeyboard" /> keyboard.
         /// </summary>
         public XRKeyboard keyboard
         {
@@ -46,12 +100,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => SetKeyboard(value);
         }
 
-        [SerializeField, Tooltip("If true, this display will use the keyboard reference. If false or if the keyboard field is empty, this display will use global keyboard.")]
-        bool m_UseSceneKeyboard;
-
         /// <summary>
-        /// If true, this display will use the keyboard reference. If false or if the keyboard field is empty,
-        /// this display will use global keyboard.
+        ///     If true, this display will use the keyboard reference. If false or if the keyboard field is empty,
+        ///     this display will use global keyboard.
         /// </summary>
         public bool useSceneKeyboard
         {
@@ -59,11 +110,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_UseSceneKeyboard = value;
         }
 
-        [SerializeField, Tooltip("If true, this display will update with each key press. If false, this display will update on OnTextSubmit.")]
-        bool m_UpdateOnKeyPress = true;
-
         /// <summary>
-        /// If true, this display will update with each key press. If false, this display will update on OnTextSubmit.
+        ///     If true, this display will update with each key press. If false, this display will update on OnTextSubmit.
         /// </summary>
         public bool updateOnKeyPress
         {
@@ -71,12 +119,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_UpdateOnKeyPress = value;
         }
 
-        [SerializeField, Tooltip("If true, this display will always subscribe to the keyboard updates. If false, this display will subscribe to keyboard when the input field gains focus.")]
-        bool m_AlwaysObserveKeyboard;
-
         /// <summary>
-        /// If true, this display will always subscribe to the keyboard updates. If false, this display will subscribe
-        /// to keyboard when the input field gains focus.
+        ///     If true, this display will always subscribe to the keyboard updates. If false, this display will subscribe
+        ///     to keyboard when the input field gains focus.
         /// </summary>
         public bool alwaysObserveKeyboard
         {
@@ -84,12 +129,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_AlwaysObserveKeyboard = value;
         }
 
-        [SerializeField, Tooltip("If true, this display will use the input field's character limit to limit the update text from the keyboard and will pass this into the keyboard when opening.")]
-        public bool m_MonitorInputFieldCharacterLimit;
-
         /// <summary>
-        /// If true, this display will use the input field's character limit to limit the update text from the keyboard
-        /// and will pass this into the keyboard when opening if.
+        ///     If true, this display will use the input field's character limit to limit the update text from the keyboard
+        ///     and will pass this into the keyboard when opening if.
         /// </summary>
         public bool monitorInputFieldCharacterLimit
         {
@@ -97,11 +139,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_MonitorInputFieldCharacterLimit = value;
         }
 
-        [SerializeField, Tooltip("If true, this display will clear the input field text on text submit from the keyboard.")]
-        public bool m_ClearTextOnSubmit;
-
         /// <summary>
-        /// If true, this display will clear the input field text on text submit from the keyboard.
+        ///     If true, this display will clear the input field text on text submit from the keyboard.
         /// </summary>
         public bool clearTextOnSubmit
         {
@@ -109,11 +148,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_ClearTextOnSubmit = value;
         }
 
-        [SerializeField, Tooltip("If true, this display will clear the input field text when the keyboard opens.")]
-        public bool m_ClearTextOnOpen;
-
         /// <summary>
-        /// If true, this display will clear the input field text on text submit from the keyboard.
+        ///     If true, this display will clear the input field text on text submit from the keyboard.
         /// </summary>
         public bool clearTextOnOpen
         {
@@ -121,11 +157,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_ClearTextOnOpen = value;
         }
 
-        [SerializeField, Tooltip("If true, this display will close the keyboard it is observing when this GameObject is disabled.")]
-        public bool m_HideKeyboardOnDisable = true;
-
         /// <summary>
-        /// If true, this display will close the keyboard it is observing when this GameObject is disabled.
+        ///     If true, this display will close the keyboard it is observing when this GameObject is disabled.
         /// </summary>
         /// <remarks>If this display is not observing a keyboard when disabled, this will have not effect on open keyboards.</remarks>
         public bool hideKeyboardOnDisable
@@ -134,11 +167,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_HideKeyboardOnDisable = value;
         }
 
-        [SerializeField, Tooltip("The event that is called when this display receives a text submitted event from the keyboard. Invoked with the keyboard text as a parameter.")]
-        UnityEvent<string> m_OnTextSubmitted = new UnityEvent<string>();
-
         /// <summary>
-        /// The event that is called when this display receives a text submitted event from the keyboard.
+        ///     The event that is called when this display receives a text submitted event from the keyboard.
         /// </summary>
         public UnityEvent<string> onTextSubmitted
         {
@@ -146,11 +176,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_OnTextSubmitted = value;
         }
 
-        [SerializeField, Tooltip("The event that is called when this display opens a keyboard.")]
-        UnityEvent m_OnKeyboardOpened = new UnityEvent();
-
         /// <summary>
-        /// The event that is called when this display opens a keyboard.
+        ///     The event that is called when this display opens a keyboard.
         /// </summary>
         public UnityEvent onKeyboardOpened
         {
@@ -158,11 +185,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_OnKeyboardOpened = value;
         }
 
-        [SerializeField, Tooltip("The event that is called when the keyboard this display is observing is closed.")]
-        UnityEvent m_OnKeyboardClosed = new UnityEvent();
-
         /// <summary>
-        /// The event that is called when the keyboard this display is observing is closed.
+        ///     The event that is called when the keyboard this display is observing is closed.
         /// </summary>
         public UnityEvent onKeyboardClosed
         {
@@ -170,11 +194,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_OnKeyboardClosed = value;
         }
 
-        [SerializeField, Tooltip("The event that is called when the keyboard changes focus and this display is not focused.")]
-        UnityEvent m_OnKeyboardFocusChanged = new UnityEvent();
-
         /// <summary>
-        /// The event that is called when the keyboard changes focus and this display is not focused.
+        ///     The event that is called when the keyboard changes focus and this display is not focused.
         /// </summary>
         public UnityEvent onKeyboardFocusChanged
         {
@@ -182,15 +203,10 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_OnKeyboardFocusChanged = value;
         }
 
-        // Active keyboard for this display
-        XRKeyboard m_ActiveKeyboard;
-
-        bool m_IsActivelyObservingKeyboard;
-
         /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
+        ///     See <see cref="MonoBehaviour" />.
         /// </summary>
-        void Awake()
+        private void Awake()
         {
             // Set active keyboard to any serialized keyboard
             m_ActiveKeyboard = m_Keyboard;
@@ -209,52 +225,53 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
+        ///     See <see cref="MonoBehaviour" />.
         /// </summary>
-        void OnEnable()
-        {
-            if (m_InputField != null)
-                m_InputField.onSelect.AddListener(OnInputFieldGainedFocus);
-        }
-
-        /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
-        /// </summary>
-        void OnDisable()
-        {
-            if (m_InputField != null)
-                m_InputField.onSelect.RemoveListener(OnInputFieldGainedFocus);
-
-            // Close the keyboard this display is observing
-            var isObservingKeyboard = m_ActiveKeyboard != null && m_ActiveKeyboard.gameObject.activeInHierarchy && m_IsActivelyObservingKeyboard;
-            if (m_HideKeyboardOnDisable && isObservingKeyboard && m_ActiveKeyboard.isOpen)
-                m_ActiveKeyboard.Close();
-        }
-
-        /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
-        /// </summary>
-        void OnDestroy()
-        {
-            StopObservingKeyboard(m_ActiveKeyboard);
-        }
-
-        /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
-        /// </summary>
-        void Start()
+        private void Start()
         {
             // Set active keyboard to global keyboard if needed
             if (m_ActiveKeyboard == null || !m_UseSceneKeyboard)
                 m_ActiveKeyboard = GlobalNonNativeKeyboard.instance.keyboard;
 
             // Observe keyboard if always observe is true
-            var observeOnStart = m_AlwaysObserveKeyboard && m_ActiveKeyboard != null & !m_IsActivelyObservingKeyboard;
+            var observeOnStart = m_AlwaysObserveKeyboard && (m_ActiveKeyboard != null) & !m_IsActivelyObservingKeyboard;
             if (observeOnStart)
                 StartObservingKeyboard(m_ActiveKeyboard);
         }
 
-        void SetKeyboard(XRKeyboard updateKeyboard, bool observeKeyboard = true)
+        /// <summary>
+        ///     See <see cref="MonoBehaviour" />.
+        /// </summary>
+        private void OnEnable()
+        {
+            if (m_InputField != null)
+                m_InputField.onSelect.AddListener(OnInputFieldGainedFocus);
+        }
+
+        /// <summary>
+        ///     See <see cref="MonoBehaviour" />.
+        /// </summary>
+        private void OnDisable()
+        {
+            if (m_InputField != null)
+                m_InputField.onSelect.RemoveListener(OnInputFieldGainedFocus);
+
+            // Close the keyboard this display is observing
+            var isObservingKeyboard = m_ActiveKeyboard != null && m_ActiveKeyboard.gameObject.activeInHierarchy &&
+                                      m_IsActivelyObservingKeyboard;
+            if (m_HideKeyboardOnDisable && isObservingKeyboard && m_ActiveKeyboard.isOpen)
+                m_ActiveKeyboard.Close();
+        }
+
+        /// <summary>
+        ///     See <see cref="MonoBehaviour" />.
+        /// </summary>
+        private void OnDestroy()
+        {
+            StopObservingKeyboard(m_ActiveKeyboard);
+        }
+
+        private void SetKeyboard(XRKeyboard updateKeyboard, bool observeKeyboard = true)
         {
             if (ReferenceEquals(updateKeyboard, m_Keyboard))
                 return;
@@ -271,7 +288,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 StartObservingKeyboard(m_ActiveKeyboard);
         }
 
-        void StartObservingKeyboard(XRKeyboard activeKeyboard)
+        private void StartObservingKeyboard(XRKeyboard activeKeyboard)
         {
             if (activeKeyboard == null || m_IsActivelyObservingKeyboard)
                 return;
@@ -285,7 +302,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             m_IsActivelyObservingKeyboard = true;
         }
 
-        void StopObservingKeyboard(XRKeyboard activeKeyboard)
+        private void StopObservingKeyboard(XRKeyboard activeKeyboard)
         {
             if (activeKeyboard == null)
                 return;
@@ -299,7 +316,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             m_IsActivelyObservingKeyboard = false;
         }
 
-        void OnInputFieldGainedFocus(string text)
+        private void OnInputFieldGainedFocus(string text)
         {
             // If this display is already observing keyboard, sync, attempt to reposition, and early out
             // Displays that are always observing keyboards call open to ensure they sync with the keyboard
@@ -320,13 +337,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 
             // If not using a scene keyboard, use global keyboard.
             if (!m_UseSceneKeyboard || m_Keyboard == null)
-            {
                 GlobalNonNativeKeyboard.instance.ShowKeyboard(m_InputField, m_MonitorInputFieldCharacterLimit);
-            }
             else
-            {
                 m_ActiveKeyboard.Open(m_InputField, m_MonitorInputFieldCharacterLimit);
-            }
 
             // Sync input field caret position with keyboard caret position
             if (m_InputField.stringPosition != m_ActiveKeyboard.caretPosition)
@@ -338,17 +351,14 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             StartObservingKeyboard(m_ActiveKeyboard);
         }
 
-        void OnTextSubmit(KeyboardTextEventArgs args)
+        private void OnTextSubmit(KeyboardTextEventArgs args)
         {
             UpdateText(args.keyboardText);
             m_OnTextSubmitted?.Invoke(args.keyboardText);
-            if (m_ClearTextOnSubmit)
-            {
-                inputField.text = string.Empty;
-            }
+            if (m_ClearTextOnSubmit) inputField.text = string.Empty;
         }
 
-        void OnTextUpdate(KeyboardTextEventArgs args)
+        private void OnTextUpdate(KeyboardTextEventArgs args)
         {
             if (!m_UpdateOnKeyPress)
                 return;
@@ -356,7 +366,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             UpdateText(args.keyboardText);
         }
 
-        void UpdateText(string text)
+        private void UpdateText(string text)
         {
             var updatedText = text;
 
@@ -371,7 +381,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 m_InputField.stringPosition = m_ActiveKeyboard.caretPosition;
         }
 
-        void KeyboardOpening(KeyboardTextEventArgs args)
+        private void KeyboardOpening(KeyboardTextEventArgs args)
         {
             Debug.Assert(args.keyboard == m_ActiveKeyboard);
 
@@ -382,7 +392,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 StopObservingKeyboard(m_ActiveKeyboard);
         }
 
-        void KeyboardClosing(KeyboardTextEventArgs args)
+        private void KeyboardClosing(KeyboardTextEventArgs args)
         {
             Debug.Assert(args.keyboard == m_ActiveKeyboard);
 
@@ -395,7 +405,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             m_OnKeyboardClosed.Invoke();
         }
 
-        void KeyboardFocusChanged(KeyboardTextEventArgs args)
+        private void KeyboardFocusChanged(KeyboardTextEventArgs args)
         {
             Debug.Assert(args.keyboard == m_ActiveKeyboard);
 

@@ -1,80 +1,46 @@
 using System;
 using System.Collections.Generic;
-
+using UnityEngine.Events;
 #if UNITY_ANDROID
 using UnityEngine.Android;
 #endif
-using UnityEngine.Events;
 
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
 {
     /// <summary>
-    /// Utility class to help define and manage Android device permissions and specify corresponding permission callbacks via <see cref="UnityEvent"/>.
+    ///     Utility class to help define and manage Android device permissions and specify corresponding permission callbacks
+    ///     via <see cref="UnityEvent" />.
     /// </summary>
     /// <remarks>
-    /// This component is currently designed to work with Android platform permissions only.
+    ///     This component is currently designed to work with Android platform permissions only.
     /// </remarks>
     [DefaultExecutionOrder(-9999)]
     public class PermissionsManager : MonoBehaviour
     {
-        const string k_DefaultPermissionId = "com.oculus.permission.USE_SCENE";
+        private const string k_DefaultPermissionId = "com.oculus.permission.USE_SCENE";
 
-        [SerializeField, Tooltip("Enables or disables the processing of permissions on Awake. If disabled, permissions will not be processed until the ProcessPermissions method is called.")]
-        bool m_ProcessPermissionsOnAwake = true;
+        [SerializeField]
+        [Tooltip(
+            "Enables or disables the processing of permissions on Awake. If disabled, permissions will not be processed until the ProcessPermissions method is called.")]
+        private bool m_ProcessPermissionsOnAwake = true;
 
-        [SerializeField, Tooltip("The system permissions to request when this component starts.")]
-        List<PermissionRequestGroup> m_PermissionGroups = new List<PermissionRequestGroup>();
-
-        /// <summary>
-        /// Current platform permission group to process. This is determined during the <see cref="Awake"/> method using based on <see cref="XRPlatformUnderstanding"/>.
-        /// </summary>
-        PermissionRequestGroup m_CurrentPlatformPermissionGroup = new PermissionRequestGroup();
+        [SerializeField] [Tooltip("The system permissions to request when this component starts.")]
+        private List<PermissionRequestGroup> m_PermissionGroups = new();
 
         /// <summary>
-        /// A group of permissions to request based on a specific platform.
+        ///     Current platform permission group to process. This is determined during the <see cref="Awake" /> method using based
+        ///     on <see cref="XRPlatformUnderstanding" />.
         /// </summary>
-        [Serializable]
-        class PermissionRequestGroup
-        {
-            [Tooltip("The platform type for which these permissions is intended for.")]
-            public XRPlatformType platformType;
-            public List<PermissionRequest> permissions;
-        }
+        private readonly PermissionRequestGroup m_CurrentPlatformPermissionGroup = new();
 
-        /// <summary>
-        /// A permission request to be made to the Android operating system.
-        /// </summary>
-        [Serializable]
-        class PermissionRequest
-        {
-            [Tooltip("The Android system permission to request when this component starts.")]
-            public string permissionId = k_DefaultPermissionId;
-
-            [Tooltip("Whether to request permission from the operating system.")]
-            public bool enabled = true;
-
-            [HideInInspector]
-            public bool requested = false;
-
-            [HideInInspector]
-            public bool responseReceived = false;
-
-            [HideInInspector]
-            public bool granted = false;
-
-            public UnityEvent<string> onPermissionGranted;
-
-            public UnityEvent<string> onPermissionDenied;
-        }
-
-        void Awake()
+        private void Awake()
         {
             if (m_ProcessPermissionsOnAwake)
                 ProcessPermissions();
         }
 
         /// <summary>
-        /// Process the permissions defined in the <see cref="m_PermissionGroups"/> list.
+        ///     Process the permissions defined in the <see cref="m_PermissionGroups" /> list.
         /// </summary>
         public void ProcessPermissions()
         {
@@ -123,13 +89,15 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
 #endif // UNITY_ANDROID
         }
 
-        void OnPermissionGranted(string permissionStr)
+        private void OnPermissionGranted(string permissionStr)
         {
             // Find the permission
             var permission = m_CurrentPlatformPermissionGroup.permissions.Find(p => p.permissionId == permissionStr);
             if (permission == null)
             {
-                Debug.LogWarning($"Permission granted callback received for an unexpected permission request, permission ID {permissionStr}", this);
+                Debug.LogWarning(
+                    $"Permission granted callback received for an unexpected permission request, permission ID {permissionStr}",
+                    this);
                 return;
             }
 
@@ -141,13 +109,15 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
             permission.onPermissionGranted.Invoke(permissionStr);
         }
 
-        void OnPermissionDenied(string permissionStr)
+        private void OnPermissionDenied(string permissionStr)
         {
             // Find the permission
             var permission = m_CurrentPlatformPermissionGroup.permissions.Find(p => p.permissionId == permissionStr);
             if (permission == null)
             {
-                Debug.LogWarning($"Permission denied callback received for an unexpected permission request, permission ID {permissionStr}", this);
+                Debug.LogWarning(
+                    $"Permission denied callback received for an unexpected permission request, permission ID {permissionStr}",
+                    this);
                 return;
             }
 
@@ -157,6 +127,41 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
 
             Debug.LogWarning($"User denied permission for: {permissionStr}", this);
             permission.onPermissionDenied.Invoke(permissionStr);
+        }
+
+        /// <summary>
+        ///     A group of permissions to request based on a specific platform.
+        /// </summary>
+        [Serializable]
+        private class PermissionRequestGroup
+        {
+            [Tooltip("The platform type for which these permissions is intended for.")]
+            public XRPlatformType platformType;
+
+            public List<PermissionRequest> permissions;
+        }
+
+        /// <summary>
+        ///     A permission request to be made to the Android operating system.
+        /// </summary>
+        [Serializable]
+        private class PermissionRequest
+        {
+            [Tooltip("The Android system permission to request when this component starts.")]
+            public string permissionId = k_DefaultPermissionId;
+
+            [Tooltip("Whether to request permission from the operating system.")]
+            public bool enabled = true;
+
+            [HideInInspector] public bool requested;
+
+            [HideInInspector] public bool responseReceived;
+
+            [HideInInspector] public bool granted;
+
+            public UnityEvent<string> onPermissionGranted;
+
+            public UnityEvent<string> onPermissionDenied;
         }
     }
 }

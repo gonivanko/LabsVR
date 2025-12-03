@@ -6,16 +6,74 @@ using UnityEngine.UI;
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 {
     /// <summary>
-    /// Keyboard key used to interface with <see cref="XRKeyboard"/>.
+    ///     Keyboard key used to interface with <see cref="XRKeyboard" />.
     /// </summary>
     public class XRKeyboardKey : Button
     {
-        [SerializeField, Tooltip("KeyFunction used for this key which is called when key is pressed. Used to communicate with the Keyboard.")]
-        KeyFunction m_KeyFunction;
+        [SerializeField]
+        [Tooltip(
+            "KeyFunction used for this key which is called when key is pressed. Used to communicate with the Keyboard.")]
+        private KeyFunction m_KeyFunction;
+
+        [SerializeField]
+        [Tooltip(
+            "(Optional) KeyCode used for this key. Used in conjunction with Key Function or as a fallback for standard commands.")]
+        private KeyCode m_KeyCode;
+
+        [SerializeField]
+        [Tooltip(
+            "Character for this key in non-shifted state. This string will be passed to the keyboard and appended to the keyboard text string or processed as a keyboard command.")]
+        private string m_Character;
+
+        [SerializeField]
+        [Tooltip(
+            "(Optional) Display character for this key in a non-shifted state. This string will be displayed on the key text field. If empty, character will be used as a fall back.")]
+        private string m_DisplayCharacter;
+
+        [SerializeField]
+        [Tooltip(
+            "(Optional) Display icon for this key in a non-shifted state. This icon will be displayed on the key icon image. If empty, the display character or character will be used as a fall back.")]
+        private Sprite m_DisplayIcon;
+
+        [SerializeField]
+        [Tooltip(
+            "Character for this key in a shifted state. This string will be passed to the keyboard and appended to the keyboard text string or processed as a keyboard command.")]
+        private string m_ShiftCharacter;
+
+        [SerializeField]
+        [Tooltip(
+            "(Optional) Display character for this key in a shifted state. This string will be displayed on the key text field. If empty, shift character will be used as a fall back.")]
+        private string m_ShiftDisplayCharacter;
+
+        [SerializeField]
+        [Tooltip(
+            "(Optional) Display icon for this key in a shifted state. This icon will be displayed on the key icon image. If empty, the shift display character or shift character will be used as a fall back.")]
+        private Sprite m_ShiftDisplayIcon;
+
+        [SerializeField]
+        [Tooltip(
+            "If true, the key pressed event will fire on button down. If false, the key pressed event will fire on On Click.")]
+        private bool m_UpdateOnKeyDown;
+
+        [SerializeField] [Tooltip("Text field used to display key character.")]
+        private TMP_Text m_TextComponent;
+
+        [SerializeField] [Tooltip("Image component used to display icons for key.")]
+        private Image m_IconComponent;
+
+        [SerializeField] [Tooltip("Image component used to highlight key indicating an active state.")]
+        private Image m_HighlightComponent;
+
+        [SerializeField] [Tooltip("(Optional) Audio source played when key is pressed.")]
+        private AudioSource m_AudioSource;
+
+        private XRKeyboard m_Keyboard;
+
+        private bool m_Shifted;
 
         /// <summary>
-        /// <see cref="KeyFunction"/> used for this key which is called when key is pressed. Used to communicate with
-        /// the Keyboard.
+        ///     <see cref="KeyFunction" /> used for this key which is called when key is pressed. Used to communicate with
+        ///     the Keyboard.
         /// </summary>
         public KeyFunction keyFunction
         {
@@ -23,11 +81,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_KeyFunction = value;
         }
 
-        [SerializeField, Tooltip("(Optional) KeyCode used for this key. Used in conjunction with Key Function or as a fallback for standard commands.")]
-        KeyCode m_KeyCode;
-
         /// <summary>
-        /// (Optional) <see cref="KeyCode"/> used for this key. Used in conjunction with Key Function or as a fallback for standard commands.
+        ///     (Optional) <see cref="KeyCode" /> used for this key. Used in conjunction with Key Function or as a fallback for
+        ///     standard commands.
         /// </summary>
         public KeyCode keyCode
         {
@@ -35,12 +91,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_KeyCode = value;
         }
 
-        [SerializeField, Tooltip("Character for this key in non-shifted state. This string will be passed to the keyboard and appended to the keyboard text string or processed as a keyboard command.")]
-        string m_Character;
-
         /// <summary>
-        /// Character for this key in non-shifted state. This string will be passed to the keyboard and appended
-        /// to the keyboard text string or processed as a keyboard command (i.e. '\s' for shift)
+        ///     Character for this key in non-shifted state. This string will be passed to the keyboard and appended
+        ///     to the keyboard text string or processed as a keyboard command (i.e. '\s' for shift)
         /// </summary>
         public string character
         {
@@ -48,12 +101,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_Character = value;
         }
 
-        [SerializeField, Tooltip("(Optional) Display character for this key in a non-shifted state. This string will be displayed on the key text field. If empty, character will be used as a fall back.")]
-        string m_DisplayCharacter;
-
         /// <summary>
-        /// (Optional) Display character for this key in a non-shifted state. This string will be displayed on the
-        /// key text field. If left empty, <see cref="character"/> will be used instead.
+        ///     (Optional) Display character for this key in a non-shifted state. This string will be displayed on the
+        ///     key text field. If left empty, <see cref="character" /> will be used instead.
         /// </summary>
         public string displayCharacter
         {
@@ -65,12 +115,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        [SerializeField, Tooltip("(Optional) Display icon for this key in a non-shifted state. This icon will be displayed on the key icon image. If empty, the display character or character will be used as a fall back.")]
-        Sprite m_DisplayIcon;
-
         /// <summary>
-        /// (Optional) Display icon for this key in a non-shifted state. This icon will be displayed on the key icon image.
-        /// If empty, the display character or character will be used instead.
+        ///     (Optional) Display icon for this key in a non-shifted state. This icon will be displayed on the key icon image.
+        ///     If empty, the display character or character will be used instead.
         /// </summary>
         public Sprite displayIcon
         {
@@ -88,12 +135,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        [SerializeField, Tooltip("Character for this key in a shifted state. This string will be passed to the keyboard and appended to the keyboard text string or processed as a keyboard command.")]
-        string m_ShiftCharacter;
-
         /// <summary>
-        /// Character for this key in a shifted state. This string will be passed to the keyboard and appended
-        /// to the keyboard text string or processed as a keyboard command (i.e. '\s' for shift).
+        ///     Character for this key in a shifted state. This string will be passed to the keyboard and appended
+        ///     to the keyboard text string or processed as a keyboard command (i.e. '\s' for shift).
         /// </summary>
         public string shiftCharacter
         {
@@ -101,13 +145,10 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_ShiftCharacter = value;
         }
 
-        [SerializeField, Tooltip("(Optional) Display character for this key in a shifted state. This string will be displayed on the key text field. If empty, shift character will be used as a fall back.")]
-        string m_ShiftDisplayCharacter;
-
         /// <summary>
-        /// (Optional) Display character for this key in a shifted state. This string will be displayed on the key text field.
-        /// If empty, <see cref="shiftCharacter"/> will be used instead, and finally <see cref="character"/> will
-        /// be capitalized and used if <see cref="shiftCharacter"/> is empty.
+        ///     (Optional) Display character for this key in a shifted state. This string will be displayed on the key text field.
+        ///     If empty, <see cref="shiftCharacter" /> will be used instead, and finally <see cref="character" /> will
+        ///     be capitalized and used if <see cref="shiftCharacter" /> is empty.
         /// </summary>
         public string shiftDisplayCharacter
         {
@@ -119,12 +160,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        [SerializeField, Tooltip("(Optional) Display icon for this key in a shifted state. This icon will be displayed on the key icon image. If empty, the shift display character or shift character will be used as a fall back.")]
-        Sprite m_ShiftDisplayIcon;
-
         /// <summary>
-        /// (Optional) Display icon for this key in a shifted state. This icon will be displayed on the key icon image.
-        /// If empty, the shift display character or shift character will be used instead.
+        ///     (Optional) Display icon for this key in a shifted state. This icon will be displayed on the key icon image.
+        ///     If empty, the shift display character or shift character will be used instead.
         /// </summary>
         public Sprite shiftDisplayIcon
         {
@@ -142,11 +180,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        [SerializeField, Tooltip("If true, the key pressed event will fire on button down. If false, the key pressed event will fire on On Click.")]
-        bool m_UpdateOnKeyDown;
-
         /// <summary>
-        /// If true, key pressed will fire on button down instead of on button up.
+        ///     If true, key pressed will fire on button down instead of on button up.
         /// </summary>
         public bool updateOnKeyDown
         {
@@ -154,11 +189,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_UpdateOnKeyDown = value;
         }
 
-        [SerializeField, Tooltip("Text field used to display key character.")]
-        TMP_Text m_TextComponent;
-
         /// <summary>
-        /// Text field used to display key character.
+        ///     Text field used to display key character.
         /// </summary>
         public TMP_Text textComponent
         {
@@ -166,11 +198,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_TextComponent = value;
         }
 
-        [SerializeField, Tooltip("Image component used to display icons for key.")]
-        Image m_IconComponent;
-
         /// <summary>
-        /// Image component used to display icons for key.
+        ///     Image component used to display icons for key.
         /// </summary>
         public Image iconComponent
         {
@@ -178,11 +207,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_IconComponent = value;
         }
 
-        [SerializeField, Tooltip("Image component used to highlight key indicating an active state.")]
-        Image m_HighlightComponent;
-
         /// <summary>
-        /// Image component used to highlight key indicating an active state.
+        ///     Image component used to highlight key indicating an active state.
         /// </summary>
         public Image highlightComponent
         {
@@ -190,11 +216,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_HighlightComponent = value;
         }
 
-        [SerializeField, Tooltip("(Optional) Audio source played when key is pressed.")]
-        AudioSource m_AudioSource;
-
         /// <summary>
-        /// (Optional) Audio source played when key is pressed.
+        ///     (Optional) Audio source played when key is pressed.
         /// </summary>
         public AudioSource audioSource
         {
@@ -202,13 +225,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_AudioSource = value;
         }
 
-        XRKeyboard m_Keyboard;
-
-        float m_LastClickTime;
-        bool m_Shifted;
-
         /// <summary>
-        /// True if this key is in a shifted state, otherwise returns false.
+        ///     True if this key is in a shifted state, otherwise returns false.
         /// </summary>
         public bool shifted
         {
@@ -221,17 +239,17 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Time the key was last pressed.
+        ///     Time the key was last pressed.
         /// </summary>
-        public float lastClickTime => m_LastClickTime;
+        public float lastClickTime { get; private set; }
 
         /// <summary>
-        /// Time since the key was last pressed.
+        ///     Time since the key was last pressed.
         /// </summary>
-        public float timeSinceLastClick => Time.time - m_LastClickTime;
+        public float timeSinceLastClick => Time.time - lastClickTime;
 
         /// <summary>
-        /// The keyboard associated with this key.
+        ///     The keyboard associated with this key.
         /// </summary>
         public XRKeyboard keyboard
         {
@@ -307,11 +325,11 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 m_Keyboard.PostprocessKeyPress(this);
             }
 
-            m_LastClickTime = Time.time;
+            lastClickTime = Time.time;
         }
 
         /// <summary>
-        /// Local handling of this key being pressed.
+        ///     Local handling of this key being pressed.
         /// </summary>
         protected virtual void KeyPressed()
         {
@@ -320,7 +338,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 if (m_AudioSource.isPlaying)
                     m_AudioSource.Stop();
 
-                float pitchVariance = Random.Range(0.95f, 1.05f);
+                var pitchVariance = Random.Range(0.95f, 1.05f);
                 m_AudioSource.pitch = pitchVariance;
                 m_AudioSource.Play();
             }
@@ -338,15 +356,12 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Enables or disables the key highlight image.
+        ///     Enables or disables the key highlight image.
         /// </summary>
         /// <param name="enable">If true, the highlight image is enabled. If false, the highlight image is disabled.</param>
         public void EnableHighlight(bool enable)
         {
-            if (m_HighlightComponent != null)
-            {
-                m_HighlightComponent.enabled = enable;
-            }
+            if (m_HighlightComponent != null) m_HighlightComponent.enabled = enable;
         }
 
         // Helper functions
@@ -408,10 +423,12 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Helper function that returns the current effective character for this key based on shifted state.
+        ///     Helper function that returns the current effective character for this key based on shifted state.
         /// </summary>
-        /// <returns>Returns the <see cref="shiftCharacter"/> when this key is in the shifted state or <see cref="character"/>
-        /// when this key is not shifted.</returns>
+        /// <returns>
+        ///     Returns the <see cref="shiftCharacter" /> when this key is in the shifted state or <see cref="character" />
+        ///     when this key is not shifted.
+        /// </returns>
         public virtual string GetEffectiveCharacter()
         {
             if (m_Shifted)
@@ -426,8 +443,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Enables or disables the key button being interactable. The icon and text alpha will be adjusted to reflect
-        /// the state of the button.
+        ///     Enables or disables the key button being interactable. The icon and text alpha will be adjusted to reflect
+        ///     the state of the button.
         /// </summary>
         /// <param name="enable">The desired interactable state of the key.</param>
         public virtual void SetButtonInteractable(bool enable)
@@ -436,10 +453,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             const float disabledAlpha = 0.25f;
 
             interactable = enable;
-            if (m_TextComponent != null)
-            {
-                m_TextComponent.alpha = enable ? enabledAlpha : disabledAlpha;
-            }
+            if (m_TextComponent != null) m_TextComponent.alpha = enable ? enabledAlpha : disabledAlpha;
 
             if (m_IconComponent != null)
             {

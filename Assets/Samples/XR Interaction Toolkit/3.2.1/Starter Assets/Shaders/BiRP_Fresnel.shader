@@ -47,13 +47,14 @@ Shader "XRIT/BiRP_Fresnel"
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        half4 LightingSimpleLambert (SurfaceOutput s, half3 lightDir, half atten) {
-              half NdotL = dot (s.Normal, lightDir);
-              half4 c;
-              c.rgb = s.Albedo * _LightColor0.rgb * (NdotL * atten);
-              c.a = s.Alpha;
-              return c;
-          }
+        half4 LightingSimpleLambert(SurfaceOutput s, half3 lightDir, half atten)
+        {
+            half NdotL = dot(s.Normal, lightDir);
+            half4 c;
+            c.rgb = s.Albedo * _LightColor0.rgb * (NdotL * atten);
+            c.a = s.Alpha;
+            return c;
+        }
 
         void surf(Input i, inout SurfaceOutputStandard o)
         {

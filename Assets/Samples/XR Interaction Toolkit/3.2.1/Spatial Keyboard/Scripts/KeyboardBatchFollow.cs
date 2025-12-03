@@ -1,17 +1,20 @@
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 {
     /// <summary>
-    /// This component moves a set of transforms to the same local z-axis position as a poke follow transform.
-    /// This is useful for batchable objects that need to move together.
+    ///     This component moves a set of transforms to the same local z-axis position as a poke follow transform.
+    ///     This is useful for batchable objects that need to move together.
     /// </summary>
     public class KeyboardBatchFollow : MonoBehaviour
     {
-        [Tooltip("The transform to follow.")]
+        [Tooltip("The transform to follow.")] [SerializeField]
+        private Transform m_FollowTransform;
+
+        [Tooltip("The transforms to move to the same local z-axis position as the poke follow transform.")]
         [SerializeField]
-        Transform m_FollowTransform;
+        private Transform[] m_FollowerTransforms;
 
         /// <summary>
-        /// The transform to follow.
+        ///     The transform to follow.
         /// </summary>
         public Transform followTransform
         {
@@ -19,12 +22,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_FollowTransform = value;
         }
 
-        [Tooltip("The transforms to move to the same local z-axis position as the poke follow transform.")]
-        [SerializeField]
-        Transform[] m_FollowerTransforms;
-
         /// <summary>
-        /// The transforms to move to the same local z-axis position as the poke follow transform.
+        ///     The transforms to move to the same local z-axis position as the poke follow transform.
         /// </summary>
         public Transform[] followerTransforms
         {
@@ -33,24 +32,7 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
-        /// </summary>
-        protected void OnDisable()
-        {
-            if (m_FollowerTransforms == null || m_FollowerTransforms.Length == 0)
-                return;
-
-            for (var index = 0; index < m_FollowerTransforms.Length; ++index)
-            {
-                var follower = m_FollowerTransforms[index];
-                var localPosition = follower.localPosition;
-                localPosition.z = 0f;
-                follower.localPosition = localPosition;
-            }
-        }
-
-        /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
+        ///     See <see cref="MonoBehaviour" />.
         /// </summary>
         protected void LateUpdate()
         {
@@ -64,6 +46,23 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 var follower = m_FollowerTransforms[index];
                 var localPosition = follower.localPosition;
                 localPosition.z = followLocalZ;
+                follower.localPosition = localPosition;
+            }
+        }
+
+        /// <summary>
+        ///     See <see cref="MonoBehaviour" />.
+        /// </summary>
+        protected void OnDisable()
+        {
+            if (m_FollowerTransforms == null || m_FollowerTransforms.Length == 0)
+                return;
+
+            for (var index = 0; index < m_FollowerTransforms.Length; ++index)
+            {
+                var follower = m_FollowerTransforms[index];
+                var localPosition = follower.localPosition;
+                localPosition.z = 0f;
                 follower.localPosition = localPosition;
             }
         }

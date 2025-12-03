@@ -1,5 +1,4 @@
 using System;
-
 #if OPENXR_1_6_OR_NEWER
 using UnityEngine.XR.OpenXR;
 #endif
@@ -7,45 +6,46 @@ using UnityEngine.XR.OpenXR;
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
 {
     /// <summary>
-    /// Enumeration of supported XR Platforms for OpenXR.
+    ///     Enumeration of supported XR Platforms for OpenXR.
     /// </summary>
     public enum XRPlatformType
     {
         /// <summary>
-        /// Meta Quest devices supported through OpenXR.
+        ///     Meta Quest devices supported through OpenXR.
         /// </summary>
-        [InspectorName("OpenXR: Meta")]
-        OpenXRMeta,
+        [InspectorName("OpenXR: Meta")] OpenXRMeta,
 
         /// <summary>
-        /// Android XR devices supported through OpenXR.
+        ///     Android XR devices supported through OpenXR.
         /// </summary>
-        [InspectorName("OpenXR: Android XR")]
-        OpenXRAndroidXR,
+        [InspectorName("OpenXR: Android XR")] OpenXRAndroidXR,
 
         /// <summary>
-        /// Other OpenXR devices.
+        ///     Other OpenXR devices.
         /// </summary>
-        [InspectorName("OpenXR: Other")]
-        OpenXROther,
+        [InspectorName("OpenXR: Other")] OpenXROther,
 
         /// <summary>
-        /// Other device that does not support OpenXR or not running on an OpenXR runtime.
+        ///     Other device that does not support OpenXR or not running on an OpenXR runtime.
         /// </summary>
-        Other,
+        Other
     }
 
     /// <summary>
-    /// Helper class that determines the current XR platform based on the active runtime.
-    /// Currently, this only supports OpenXR Runtimes from Meta and Google.
+    ///     Helper class that determines the current XR platform based on the active runtime.
+    ///     Currently, this only supports OpenXR Runtimes from Meta and Google.
     /// </summary>
     public static class XRPlatformUnderstanding
     {
-        const string k_RuntimeNameMeta = "Oculus";
-        const string k_RuntimeNameAndroidXR = "Android XR";
+        private const string k_RuntimeNameMeta = "Oculus";
+        private const string k_RuntimeNameAndroidXR = "Android XR";
+
+        private static XRPlatformType s_CurrentPlatform = XRPlatformType.Other;
+
+        private static bool s_Initialized;
 
         /// <summary>
-        /// The current platform based on the OpenXR Runtime name.
+        ///     The current platform based on the OpenXR Runtime name.
         /// </summary>
         public static XRPlatformType CurrentPlatform
         {
@@ -56,19 +56,16 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
                     s_CurrentPlatform = GetCurrentXRPlatform();
                     s_Initialized = true;
                 }
+
                 return s_CurrentPlatform;
             }
         }
 
-        static XRPlatformType s_CurrentPlatform = XRPlatformType.Other;
-
-        static bool s_Initialized;
-
         /// <summary>
-        /// Returns the current platform based on the active OpenXR Runtime name.
+        ///     Returns the current platform based on the active OpenXR Runtime name.
         /// </summary>
         /// <returns>The current platform based on the active OpenXR Runtime name.</returns>
-        static XRPlatformType GetCurrentXRPlatform()
+        private static XRPlatformType GetCurrentXRPlatform()
         {
             // If we have already initialized, just return the current platform
             if (s_Initialized)
@@ -79,11 +76,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
             {
                 var openXRRuntimeName = OpenXRRuntime.name;
                 if (string.IsNullOrEmpty(openXRRuntimeName))
-                {
                     s_CurrentPlatform = XRPlatformType.Other;
-                }
                 else
-                {
                     switch (openXRRuntimeName)
                     {
                         case k_RuntimeNameMeta:
@@ -99,7 +93,6 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets
                             s_CurrentPlatform = XRPlatformType.OpenXROther;
                             break;
                     }
-                }
             }
             catch (Exception e)
             {

@@ -2,15 +2,18 @@
 namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 {
     /// <summary>
-    /// Manage the reuse and updating of data for each child <see cref="XRKeyboardKey"/> button.
+    ///     Manage the reuse and updating of data for each child <see cref="XRKeyboardKey" /> button.
     /// </summary>
     public class XRKeyboardLayout : MonoBehaviour
     {
-        [SerializeField]
-        XRKeyboardConfig m_DefaultKeyMapping;
+        [SerializeField] private XRKeyboardConfig m_DefaultKeyMapping;
+
+        [SerializeField] private XRKeyboardConfig m_ActiveKeyMapping;
+
+        private XRKeyboardKey[] m_Keys;
 
         /// <summary>
-        /// Default key mapping for resetting key layout.
+        ///     Default key mapping for resetting key layout.
         /// </summary>
         public XRKeyboardConfig defaultKeyMapping
         {
@@ -18,11 +21,8 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             set => m_DefaultKeyMapping = value;
         }
 
-        [SerializeField]
-        XRKeyboardConfig m_ActiveKeyMapping;
-
         /// <summary>
-        /// Active <see cref="XRKeyboardConfig"/> which data is populated in these keys.
+        ///     Active <see cref="XRKeyboardConfig" /> which data is populated in these keys.
         /// </summary>
         public XRKeyboardConfig activeKeyMapping
         {
@@ -34,29 +34,27 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
             }
         }
 
-        XRKeyboardKey [] m_Keys;
-
         /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
+        ///     See <see cref="MonoBehaviour" />.
         /// </summary>
-        void Awake()
+        private void Awake()
         {
             m_Keys = GetComponentsInChildren<XRKeyboardKey>();
         }
 
         /// <summary>
-        /// See <see cref="MonoBehaviour"/>.
+        ///     See <see cref="MonoBehaviour" />.
         /// </summary>
-        void Start()
+        private void Start()
         {
             PopulateKeys();
         }
 
         /// <summary>
-        /// Sets the active key mapping to the default key mapping.
+        ///     Sets the active key mapping to the default key mapping.
         /// </summary>
-        /// <seealso cref="activeKeyMapping"/>
-        /// <seealso cref="defaultKeyMapping"/>
+        /// <seealso cref="activeKeyMapping" />
+        /// <seealso cref="defaultKeyMapping" />
         public void SetDefaultLayout()
         {
             if (m_DefaultKeyMapping != null)
@@ -64,11 +62,12 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
         }
 
         /// <summary>
-        /// Updates all child <see cref="XRKeyboardKey"/> buttons with the data from the <see cref="activeKeyMapping"/>.
+        ///     Updates all child <see cref="XRKeyboardKey" /> buttons with the data from the <see cref="activeKeyMapping" />.
         /// </summary>
         /// <remarks>
-        /// This function returns without changing the keys if the number of child <see cref="XRKeyboardKey"/> buttons is less than
-        /// the number of mappings in the <see cref="activeKeyMapping"/>.
+        ///     This function returns without changing the keys if the number of child <see cref="XRKeyboardKey" /> buttons is less
+        ///     than
+        ///     the number of mappings in the <see cref="activeKeyMapping" />.
         /// </remarks>
         public void PopulateKeys()
         {
@@ -83,7 +82,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
 
             if (m_Keys.Length < keyMappings.Count)
             {
-                Debug.LogWarning("Keyboard layout update failed: There are fewer keys than key mappings in the current config. Ensure there is a correct number of keys and key mappings.", this);
+                Debug.LogWarning(
+                    "Keyboard layout update failed: There are fewer keys than key mappings in the current config. Ensure there is a correct number of keys and key mappings.",
+                    this);
                 return;
             }
 
@@ -98,7 +99,9 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard
                 key.shiftCharacter = mapping.shiftCharacter;
                 key.shiftDisplayCharacter = mapping.shiftDisplayCharacter;
 
-                key.keyFunction = mapping.overrideDefaultKeyFunction ? mapping.keyFunction : m_ActiveKeyMapping.defaultKeyFunction;
+                key.keyFunction = mapping.overrideDefaultKeyFunction
+                    ? mapping.keyFunction
+                    : m_ActiveKeyMapping.defaultKeyFunction;
                 key.keyCode = mapping.keyCode;
 
                 key.displayIcon = mapping.displayIcon;
